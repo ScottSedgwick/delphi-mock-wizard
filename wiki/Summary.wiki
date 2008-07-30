@@ -1,0 +1,9 @@
+Summary of the delphi-mock-wizard project.
+
+= Introduction =
+
+OK, firstly, there's no code yet.  You may have noticed.  I have it, but I need to tidy it up before I post it.  Please be patient.
+
+Now, what is this all about?  I am a Delphi developer (among other things) and found using the [http://sourceforge.net/projects/pascalmock/ PascalMock] library a bit of a chore.  There was a *lot* of boilerplate code required.  So, this project was born.
+
+For now, I'm leeching off the good folks at Google, getting them to keep track of my TODO list.  I'll pay them back with source soon.
