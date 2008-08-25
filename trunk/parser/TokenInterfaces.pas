@@ -10,9 +10,18 @@ type
   end;
 
   IParameter = interface(INamedItem)
+    function GetIndexName: string;
+    function GetIndexType: string;
+    function GetModifier: string;
     function GetType: string;
+    procedure SetIndexName(const Value: string);
+    procedure SetIndexType(const Value: string);
+    procedure SetModifier(const Value: string);
     procedure SetType(const Value: string);
     property DataType: string read GetType write SetType;
+    property Modifier: string read GetModifier write SetModifier;
+    property IndexName: string read GetIndexName write SetIndexName;
+    property IndexType: string read GetIndexType write SetIndexType;
   end;
 
   IGenericList = interface
@@ -64,10 +73,20 @@ type
     property Items[Index: Integer]: IProperty read GetItems; default;
   end;
 
+  IAncestor = INamedItem;
+
+  IAncestorList = interface(IGenericList)
+    function Add: IAncestor;
+    function GetItems(Index: Integer): IAncestor;
+    property Items[Index: Integer]: IAncestor read GetItems; default;
+  end;
+
   IInterface = interface(INamedItem)
+    function GetAncestors: IAncestorList;
     function GetFunctions: IFunctionList;
     function GetMethods: IMethodList;
     function GetProperties: IPropertyList;
+    property Ancestors: IAncestorList read GetAncestors;
     property Functions: IFunctionList read GetFunctions;
     property Methods: IMethodList read GetMethods;
     property Properties: IPropertyList read GetProperties;
