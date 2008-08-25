@@ -35,11 +35,23 @@ type
 
   TParameter = class(TNamedItem, IParameter)
   private
+    FIndexName: string;
+    FIndexType: string;
+    FModifier: string;
     FType: string;
     function GetType: string;
     procedure SetType(const Value: string);
-  public  
-    property DataType: string read GetType write SetType;
+    function GetModifier: string;
+    procedure SetModifier(const Value: string);
+    function GetIndexName: string;
+    function GetIndexType: string;
+    procedure SetIndexName(const Value: string);
+    procedure SetIndexType(const Value: string);
+  public
+    property DataType: string read GetType write SetType;   
+    property Modifier: string read GetModifier write SetModifier;  
+    property IndexName: string read GetIndexName write SetIndexName;
+    property IndexType: string read GetIndexType write SetIndexType;
   end;
 
   TParameterList = class(TGenericList, IParameterList)
@@ -104,23 +116,43 @@ type
     function GetItems(Index: Integer): IProperty;
   public
     property Items[Index: Integer]: IProperty read GetItems; default;
+  end; 
+
+  TAncestor = class(TInterfacedObject, IAncestor)
+  private
+    FName: string;
+    function GetName: string;
+    procedure SetName(const Value: string);
+  public      
+    property Name: string read GetName write SetName;
+  end;
+
+  TAncestorList = class(TGenericList, IAncestorList)
+  private
+    function Add: IAncestor;
+    function GetItems(Index: Integer): IAncestor;
+  public
+    property Items[Index: Integer]: IAncestor read GetItems; default;
   end;
 
   TInterface = class(TNamedItem, IInterface)
   private
+    FAncestors: IAncestorList;
     FFunctions: IFunctionList;
     FMethods: IMethodList;
     FProperties: IPropertyList;
+    function GetAncestors: IAncestorList;
     function GetFunctions: IFunctionList;
     function GetMethods: IMethodList;
     function GetProperties: IPropertyList;
   public
     constructor Create;
     destructor Destroy; override;
+    property Ancestors: IAncestorList read GetAncestors;
     property Functions: IFunctionList read GetFunctions;
     property Methods: IMethodList read GetMethods;
     property Properties: IPropertyList read GetProperties;
-  end;  
+  end;
 
   TInterfacesList = class(TGenericList, IInterfacesList)
   private
@@ -147,9 +179,39 @@ end;
 
 { TParameter }  
 
+function TParameter.GetIndexName: string;
+begin
+  Result := FIndexName;
+end;
+
+function TParameter.GetIndexType: string;
+begin
+  Result := FIndexType;
+end;
+
+function TParameter.GetModifier: string;
+begin
+  Result := FModifier;
+end;
+
 function TParameter.GetType: string;
 begin
   Result := FType;
+end;
+
+procedure TParameter.SetIndexName(const Value: string);
+begin
+  FIndexName := Value;
+end;
+
+procedure TParameter.SetIndexType(const Value: string);
+begin
+  FIndexType := Value;
+end;
+
+procedure TParameter.SetModifier(const Value: string);
+begin
+  FModifier := Value;
 end;
 
 procedure TParameter.SetType(const Value: string);
@@ -292,6 +354,7 @@ end;
 constructor TInterface.Create;
 begin
   inherited;
+  FAncestors := TAncestorList.Create;
   FFunctions := TFunctionList.Create;
   FMethods := TMethodList.Create;
   FProperties := TPropertyList.Create;
@@ -299,10 +362,16 @@ end;
 
 destructor TInterface.Destroy;
 begin
+  FAncestors := nil;
   FFunctions := nil;
   FMethods := nil;
   FProperties := nil;
   inherited;
+end;
+
+function TInterface.GetAncestors: IAncestorList;
+begin
+  Result := FAncestors;
 end;
 
 function TInterface.GetFunctions: IFunctionList;
@@ -350,6 +419,31 @@ end;
 function TUnit.GetInterfaces: IInterfacesList;
 begin
   Result := FInterfaces;
+end;
+
+{ TAncestorList }
+
+function TAncestorList.Add: IAncestor;
+begin
+  Result := TAncestor.Create;
+  FList.Add(Result);
+end;
+
+function TAncestorList.GetItems(Index: Integer): IAncestor;
+begin
+  Result := IAncestor(FList.Items[Index]);
+end;
+
+{ TAncestor }
+
+function TAncestor.GetName: string;
+begin
+  Result := FName;
+end;
+
+procedure TAncestor.SetName(const Value: string);
+begin
+  FName := Value;
 end;
 
 end.
