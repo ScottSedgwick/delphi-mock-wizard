@@ -20,6 +20,7 @@ type
     function GetName: string;
     procedure SetName(const Value: string);
   public
+    function Write: string; virtual;
     property Name: string read GetName write SetName;
   end;
 
@@ -30,46 +31,57 @@ type
     FList: IInterfaceList;
   public
     constructor Create;
+    function Write: string; virtual; abstract;
     property Count: Integer read GetCount;
   end;
 
   TParameter = class(TNamedItem, IParameter)
   private
-    FIndexName: string;
-    FIndexType: string;
-    FModifier: string;
+    FModifier: TParameterModifier;
     FType: string;
     function GetType: string;
     procedure SetType(const Value: string);
-    function GetModifier: string;
-    procedure SetModifier(const Value: string);
-    function GetIndexName: string;
-    function GetIndexType: string;
-    procedure SetIndexName(const Value: string);
-    procedure SetIndexType(const Value: string);
+    function GetModifier: TParameterModifier;
+    procedure SetModifier(const Value: TParameterModifier);
+    function WriteModifier: string;
   public
-    property DataType: string read GetType write SetType;   
-    property Modifier: string read GetModifier write SetModifier;  
-    property IndexName: string read GetIndexName write SetIndexName;
-    property IndexType: string read GetIndexType write SetIndexType;
+    function Write: string; override;
+    property DataType: string read GetType write SetType;
+    property Modifier: TParameterModifier read GetModifier write SetModifier;
   end;
 
   TParameterList = class(TGenericList, IParameterList)
   private
     function Add: IParameter;
     function GetItems(Index: Integer): IParameter;
-  public
+  public                                     
+    function Write: string; override;
     property Items[Index: Integer]: IParameter read GetItems; default;
   end;
 
   TMethod = class(TParameter, IMethod)
   private
     FParams: IParameterList;
-    function GetParams: IParameterList;
+    FInheritance: TMethodInheritance;
+    FModifier: TMethodModifier;
+    FOverloaded: Boolean;
+    function GetParams: IParameterList;  
+    function GetInheritance: TMethodInheritance;
+    procedure SetInheritance(const Value: TMethodInheritance);
+    function GetModifier: TMethodModifier;
+    procedure SetModifier(const Value: TMethodModifier);
+    function GetOverloaded: Boolean;
+    procedure SetOverloaded(const Value: Boolean);
+    function WriteParams: string;
+    function WriteModifiers: string;
   public
     constructor Create;
     destructor Destroy; override;
-    property Params: IParameterList read GetParams;
+    function Write: string; override;
+    property Params: IParameterList read GetParams; 
+    property Inheritance: TMethodInheritance read GetInheritance write SetInheritance;
+    property Modifier: TMethodModifier read GetModifier write SetModifier;
+    property Overloaded: Boolean read GetOverloaded write SetOverloaded;
   end;
 
   TMethodList = class(TGenericList, IMethodList)
@@ -85,7 +97,9 @@ type
     FReturnType: string;
     function GetReturnType: string;
     procedure SetReturnType(const Value: string);
-  public
+    function WriteParams: string;
+  public  
+    function Write: string; override;
     property ReturnType: string read GetReturnType write SetReturnType;
   end;    
 
@@ -99,13 +113,26 @@ type
 
   TProperty = class(TParameter, IProperty)
   private
+    FIndex: IParameter;
+    FDefault: Boolean;            
     FReader: string;
     FWriter: string;
+    function GetDefault: Boolean;
+    procedure SetDefault(const Value: Boolean);
+    function GetIndex: IParameter;
     function GetReader: string;
     function GetWriter: string;
     procedure SetReader(const Value: string);
     procedure SetWriter(const Value: string);
+    function WriteDefault: string;
+    function WriteIndex: string;
+    function WriteReader: string;
+    function WriteWriter: string;
   public
+    constructor Create;
+    function Write: string; override;
+    property Default: Boolean read GetDefault write SetDefault;
+    property Index: IParameter read GetIndex;
     property Reader: string read GetReader write SetReader;
     property Writer: string read GetWriter write SetWriter;
   end;
@@ -123,7 +150,8 @@ type
     FName: string;
     function GetName: string;
     procedure SetName(const Value: string);
-  public      
+  public
+    function Write: string;      
     property Name: string read GetName write SetName;
   end;
 
@@ -135,7 +163,7 @@ type
     property Items[Index: Integer]: IAncestor read GetItems; default;
   end;
 
-  TInterface = class(TNamedItem, IInterface)
+  TInterface = class(TNamedItem, IInterfaceType)
   private
     FAncestors: IAncestorList;
     FFunctions: IFunctionList;
@@ -156,10 +184,10 @@ type
 
   TInterfacesList = class(TGenericList, IInterfacesList)
   private
-    function Add: IInterface;
-    function GetItems(Index: Integer): IInterface;
+    function Add: IInterfaceType;
+    function GetItems(Index: Integer): IInterfaceType;
   public
-    property Items[Index: Integer]: IInterface read GetItems; default;
+    property Items[Index: Integer]: IInterfaceType read GetItems; default;
   end;  
 
   TUnit = class(TNamedItem, IUnit)
@@ -177,19 +205,9 @@ begin
   Result := TUnit.Create;
 end;
 
-{ TParameter }  
+{ TParameter }
 
-function TParameter.GetIndexName: string;
-begin
-  Result := FIndexName;
-end;
-
-function TParameter.GetIndexType: string;
-begin
-  Result := FIndexType;
-end;
-
-function TParameter.GetModifier: string;
+function TParameter.GetModifier: TParameterModifier;
 begin
   Result := FModifier;
 end;
@@ -199,17 +217,7 @@ begin
   Result := FType;
 end;
 
-procedure TParameter.SetIndexName(const Value: string);
-begin
-  FIndexName := Value;
-end;
-
-procedure TParameter.SetIndexType(const Value: string);
-begin
-  FIndexType := Value;
-end;
-
-procedure TParameter.SetModifier(const Value: string);
+procedure TParameter.SetModifier(const Value: TParameterModifier);
 begin
   FModifier := Value;
 end;
@@ -217,6 +225,21 @@ end;
 procedure TParameter.SetType(const Value: string);
 begin
   FType := Value;
+end;
+
+function TParameter.Write: string;
+begin
+  Result := Format('%s%s: %s', [WriteModifier, Name, DataType]);
+end;
+
+function TParameter.WriteModifier: string;
+begin
+  case FModifier of
+    pmNone:  Result := '';
+    pmVar:   Result := 'var ';
+    pmConst: Result := 'const ';
+    pmOut:   Result := 'out ';
+  end;
 end;
 
 { TParameterList }
@@ -230,6 +253,18 @@ end;
 function TParameterList.GetItems(Index: Integer): IParameter;
 begin
   Result := IParameter(FList.Items[Index]);
+end;
+
+function TParameterList.Write: string;
+var
+  i: Integer;
+begin
+  Result := '';
+  for i := 0 to Count - 1 do
+  begin
+    Result := Result + Items[i].Write + '; ';
+  end;
+  Result := Copy(Result, 1, Length(Result) - 2);
 end;
 
 { TMethod }
@@ -246,9 +281,76 @@ begin
   inherited;
 end;
 
+function TMethod.GetInheritance: TMethodInheritance;
+begin
+  Result := FInheritance;
+end;
+
+function TMethod.GetModifier: TMethodModifier;
+begin
+  Result := FModifier;
+end;
+
+function TMethod.GetOverloaded: Boolean;
+begin
+  Result := FOverloaded;
+end;
+
 function TMethod.GetParams: IParameterList;
 begin
   Result := FParams;
+end;
+
+procedure TMethod.SetInheritance(const Value: TMethodInheritance);
+begin
+  FInheritance := Value;
+end;
+
+procedure TMethod.SetModifier(const Value: TMethodModifier);
+begin
+  FModifier := Value;
+end;
+
+procedure TMethod.SetOverloaded(const Value: Boolean);
+begin
+  FOverloaded := Value;
+end;
+
+function TMethod.Write: string;
+begin
+  Result := Format('procedure %s%s;%s', [Name, WriteParams, WriteModifiers]); 
+end;
+
+function TMethod.WriteModifiers: string;
+var
+  sInheritance: string;
+  sModifiers: string;
+  sOverloaded: string;
+begin
+  case Inheritance of
+    miNone:        sInheritance := '';
+    miVirtual:     sInheritance := ' virtual;';
+    miDynamic:     sInheritance := ' dynamic;';
+    miOverride:    sInheritance := ' override;';
+    miReintroduce: sInheritance := ' reintroduce;';
+  end;
+  case Modifier of
+    mmNone:    sModifiers := '';
+    mmStdCall: sModifiers := ' stdcall;';
+    mmCdecl:   sModifiers := ' cdecl;';
+  end;
+  if Overloaded then
+    sOverloaded := ' overloaded;'
+  else
+    sOverloaded := '';
+  Result := Format('%s%s%s', [sInheritance, sModifiers, sOverloaded]);
+end;
+
+function TMethod.WriteParams: string;
+begin
+  Result := FParams.Write;
+  if (Result <> '') then
+    Result := Format('(%s)', [Result]);
 end;
 
 { TNamedItem }
@@ -261,6 +363,11 @@ end;
 procedure TNamedItem.SetName(const Value: string);
 begin
   FName := Value;
+end;
+
+function TNamedItem.Write: string;
+begin
+  Result := Name;
 end;
 
 { TGenericList }
@@ -301,6 +408,18 @@ begin
   FReturnType := Value;
 end;
 
+function TFunction.Write: string;
+begin
+  Result := Format('function %s%s: %s;', [Name, WriteParams, ReturnType])
+end;
+
+function TFunction.WriteParams: string;
+begin
+  Result := FParams.Write;
+  if (Result <> '') then
+    Result := Format('(%s)', [Result]);
+end;
+
 { TFunctionList }
 
 function TFunctionList.Add: IFunction;
@@ -316,6 +435,22 @@ end;
 
 { TProperty }
 
+constructor TProperty.Create;
+begin
+  inherited;
+  FIndex := TParameter.Create;
+end;
+
+function TProperty.GetDefault: Boolean;
+begin
+  Result := FDefault;
+end;
+
+function TProperty.GetIndex: IParameter;
+begin
+  Result := FIndex;
+end;
+
 function TProperty.GetReader: string;
 begin
   Result := FReader;
@@ -326,6 +461,11 @@ begin
   Result := FWriter;
 end;
 
+procedure TProperty.SetDefault(const Value: Boolean);
+begin
+  FDefault := Value;
+end;
+
 procedure TProperty.SetReader(const Value: string);
 begin
   FReader := Value;
@@ -334,6 +474,43 @@ end;
 procedure TProperty.SetWriter(const Value: string);
 begin
   FWriter := Value;
+end;
+
+function TProperty.Write: string;
+begin
+  Result := Format('property %s%s: %s%s%s;%s', [Name, WriteIndex, DataType, WriteReader, WriteWriter, WriteDefault]);
+end;
+
+function TProperty.WriteDefault: string;
+begin
+  if Default then
+    Result := ' default;'
+  else
+    Result := '';
+end;
+
+function TProperty.WriteIndex: string;
+begin
+  if (Index.Name <> '') then
+    Result := Format('[%s: %s]', [Index.Name, Index.DataType])
+  else
+    Result := '';
+end;
+
+function TProperty.WriteReader: string;
+begin
+  if (Reader <> '') then
+    Result := Format(' read %s', [Reader])
+  else
+    Result := '';
+end;
+
+function TProperty.WriteWriter: string;
+begin
+  if (Writer <> '') then
+    Result := Format(' write %s', [Writer])
+  else
+    Result := '';
 end;
 
 { TPropertyList }
@@ -391,15 +568,15 @@ end;
 
 { TInterfacesList }
 
-function TInterfacesList.Add: IInterface;
+function TInterfacesList.Add: IInterfaceType;
 begin
   Result := TInterface.Create;
   FList.Add(Result);
 end;
 
-function TInterfacesList.GetItems(Index: Integer): IInterface;
+function TInterfacesList.GetItems(Index: Integer): IInterfaceType;
 begin
-  Result := IInterface(FList.Items[Index]);
+  Result := FList.Items[Index] as IInterfaceType;
 end;
 
 { TUnit }
@@ -444,6 +621,11 @@ end;
 procedure TAncestor.SetName(const Value: string);
 begin
   FName := Value;
+end;
+
+function TAncestor.Write: string;
+begin
+  Result := Name;
 end;
 
 end.

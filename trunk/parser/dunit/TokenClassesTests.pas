@@ -41,7 +41,7 @@ end;
 
 procedure TUnitTests.TestAddInterface;
 var
-  AIntf, BIntf: IInterface;
+  AIntf, BIntf: IInterfaceType;
 begin
   AIntf := FUnit.Interfaces.Add;
   Check(Assigned(AIntf), 'First Interface not created properly');
@@ -61,7 +61,7 @@ end;
 
 procedure TUnitTests.TestAddFunction;
 var
-  AIntf: IInterface;
+  AIntf: IInterfaceType;
   AFunc, BFunc: IFunction;
 begin
   AIntf := FUnit.Interfaces.Add;

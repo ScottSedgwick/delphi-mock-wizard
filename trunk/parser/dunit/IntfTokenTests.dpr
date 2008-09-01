@@ -13,7 +13,10 @@ uses
   TextTestRunner,
   TokenClassesTests in 'TokenClassesTests.pas',
   TokenClasses in '..\TokenClasses.pas',
-  TokenInterfaces in '..\TokenInterfaces.pas';
+  TokenInterfaces in '..\TokenInterfaces.pas',
+  ParserTests in 'ParserTests.pas',
+  IntfParser in '..\IntfParser.pas',
+  TestInterfaces in 'TestInterfaces.pas';
 
 {$R *.RES}
 
