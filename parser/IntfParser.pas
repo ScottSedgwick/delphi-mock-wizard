@@ -4,6 +4,7 @@ interface
 
 uses
   CastaliaSimplePasPar,
+  Classes,
   TokenClasses,
   TokenInterfaces;
 
@@ -11,14 +12,13 @@ type
   TIntfParser = class(TmwSimplePasPar)
   private
     FUnit: IUnit;
-    FCurrentInterface: IInterface;
+    FCurrentInterface: IInterfaceType;
     FCurrentFunction: IFunction;
     FCurrentMethod: IMethod;
     FCurrentParameter: IParameter;
     FCurrentProperty: IProperty;
     FLastTypeName: string;
   protected
-    procedure UnitName; override;
     procedure InterfaceType; override;
     procedure TypeName; override;
     procedure AncestorId; override;
@@ -36,10 +36,12 @@ type
     procedure TypeId; override;
     procedure ReadAccessIdentifier; override;
     procedure WriteAccessIdentifier; override;
+    procedure PropertyDefault; override;
     procedure IdentifierList; override;
   public
     constructor Create;
-    destructor Destroy; override;
+    destructor Destroy; override; 
+    procedure Run(UnitName: string; SourceStream: TCustomMemoryStream); override;
     property AUnit: IUnit read FUnit;
   end;
 
@@ -65,14 +67,6 @@ end;
 destructor TIntfParser.Destroy;
 begin
   FUnit := nil;
-  inherited;
-end;
-//==============================================================================
-// Unit level stuff
-//==============================================================================
-procedure TIntfParser.UnitName;
-begin
-  FUnit.Name := Lexer.Token;
   inherited;
 end;
 
@@ -167,7 +161,7 @@ begin
     FCurrentParameter := FCurrentMethod.Params.Add
   else if Assigned(FCurrentFunction) then
     FCurrentParameter := FCurrentFunction.Params.Add;
-  FCurrentParameter.Modifier := 'const';
+  FCurrentParameter.Modifier := pmConst;
   inherited;
   FCurrentParameter := nil;
 end;
@@ -191,8 +185,8 @@ procedure TIntfParser.TypeId;
 begin
   if Assigned(FCurrentProperty) then
   begin
-    if (FCurrentProperty.IndexName <> '') and (FCurrentProperty.IndexType = '') then 
-      FCurrentProperty.IndexType := Lexer.Token 
+    if (FCurrentProperty.Index.Name <> '') and (FCurrentProperty.Index.DataType = '') then
+      FCurrentProperty.Index.DataType := Lexer.Token 
     else
       FCurrentProperty.DataType := Lexer.Token;
   end;
@@ -216,7 +210,7 @@ end;
 procedure TIntfParser.IdentifierList;
 begin
   if Assigned(FCurrentProperty) then
-    FCurrentProperty.IndexName := Lexer.Token;
+    FCurrentProperty.Index.Name := Lexer.Token;
   inherited;
 end;
 
@@ -224,6 +218,20 @@ procedure TIntfParser.AncestorId;
 begin
   if Assigned(FCurrentInterface) then
     FCurrentInterface.Ancestors.Add.Name := Lexer.Token;
+  inherited;
+end;
+
+procedure TIntfParser.Run(UnitName: string;
+  SourceStream: TCustomMemoryStream);
+begin
+  FUnit.Name := UnitName;
+  inherited;
+end;
+
+procedure TIntfParser.PropertyDefault;
+begin
+  if Assigned(FCurrentProperty) then
+    FCurrentProperty.Default := True;
   inherited;
 end;
 
