@@ -2,6 +2,9 @@ unit TokenInterfaces;
 
 interface
 
+uses
+  Classes;
+
 type
   IWriteable = interface
     ['{79957D46-7745-11DD-828E-0090F52BA021}']
@@ -132,7 +135,9 @@ type
   IUnit = interface(INamedItem)
     ['{A0FD7564-7745-11DD-828E-0090F52BA021}']
     function GetInterfaces: IInterfacesList;
+    function GetUsesUnits: TStrings;
     property Interfaces: IInterfacesList read GetInterfaces;
+    property UsesUnits: TStrings read GetUsesUnits;
   end;
 
 implementation

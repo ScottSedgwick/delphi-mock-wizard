@@ -193,11 +193,14 @@ type
   TUnit = class(TNamedItem, IUnit)
   private
     FInterfaces: IInterfacesList;
+    FUsesUnits: TStrings;
     function GetInterfaces: IInterfacesList;
+    function GetUsesUnits: TStrings;
   public
     constructor Create;
     destructor Destroy; override;
     property Interfaces: IInterfacesList read GetInterfaces;
+    property UsesUnits: TStrings read GetUsesUnits;
   end;
 
 function CreateUnit: IUnit;
@@ -585,17 +588,24 @@ constructor TUnit.Create;
 begin
   inherited;
   FInterfaces := TInterfacesList.Create;
+  FUsesUnits := TStringList.Create;
 end;
 
 destructor TUnit.Destroy;
 begin
   FInterfaces := nil;
+  FreeAndNil(FUsesUnits);
   inherited;
 end;
 
 function TUnit.GetInterfaces: IInterfacesList;
 begin
   Result := FInterfaces;
+end;
+
+function TUnit.GetUsesUnits: TStrings;
+begin
+  Result := FUsesUnits;
 end;
 
 { TAncestorList }
