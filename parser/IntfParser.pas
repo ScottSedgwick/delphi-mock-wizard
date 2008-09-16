@@ -42,12 +42,14 @@ type
     constructor Create;
     destructor Destroy; override; 
     procedure Run(UnitName: string; SourceStream: TCustomMemoryStream); override;
+    procedure LoadAndRun(const Filename: string);
     property AUnit: IUnit read FUnit;
   end;
 
 implementation
 
 uses
+  Classes,
   SysUtils;
 
 { TIntfParser }
@@ -85,6 +87,19 @@ begin
   FCurrentInterface.Name := FLastTypeName;
   inherited;
   FCurrentInterface := nil;
+end;
+
+procedure TIntfParser.LoadAndRun(const Filename: string);
+var
+  strmFile: TMemoryStream;
+begin
+  strmFile := TMemoryStream.Create;
+  try
+    strmFile.LoadFromFile(Filename);
+    Run(Filename, strmFile);
+  finally
+    FreeAndNil(strmFile);
+  end;
 end;
 
 //==============================================================================
