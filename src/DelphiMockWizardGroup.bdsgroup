@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<PersonalityInfo>
+		<Option>
+			<Option Name="Personality">Default.Personality</Option>
+			<Option Name="ProjectType"></Option>
+			<Option Name="Version">1.0</Option>
+			<Option Name="GUID">{43548431-0811-4410-84AB-35ACA67D3598}</Option>
+		</Option>
+	</PersonalityInfo>
+	<Default.Personality>  <Projects>
+      <Projects Name="MockGeneratorTestApp.exe">testapp\MockGeneratorTestApp.bdsproj</Projects>
+      <Projects Name="MockGeneratorAddinPkg.bpl">..\packages\MockGeneratorAddinPkg.bdsproj</Projects>
+      <Projects Name="Targets">MockGeneratorTestApp.exe MockGeneratorAddinPkg.bpl</Projects>
+    </Projects>
+    <Dependencies/>
+  </Default.Personality>
+	<StarTeamAssociation></StarTeamAssociation>
+	<StarTeamNonRelativeFiles></StarTeamNonRelativeFiles>
+</BorlandProject>
