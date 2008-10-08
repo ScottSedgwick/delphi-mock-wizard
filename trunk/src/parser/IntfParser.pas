@@ -49,7 +49,6 @@ type
 implementation
 
 uses
-  Classes,
   SysUtils;
 
 { TIntfParser }
