@@ -4,33 +4,34 @@
 
 program IntfTokenTests;
 
+
+{$IFDEF CONSOLE_TESTRUNNER}
+{$APPTYPE CONSOLE}
+{$ENDIF}
+
 uses
-  TestFramework {$IFDEF LINUX},
-  QForms,
-  QGUITestRunner {$ELSE},
   Forms,
-  GUITestRunner {$ENDIF},
+  TestFramework,
+  GUITestRunner,
   TextTestRunner,
   TokenClassesTests in 'TokenClassesTests.pas',
   TokenClasses in '..\TokenClasses.pas',
   TokenInterfaces in '..\TokenInterfaces.pas',
   ParserTests in 'ParserTests.pas',
   IntfParser in '..\IntfParser.pas',
-  TestInterfaces in 'TestInterfaces.pas';
+  TestInterfaces in 'TestInterfaces.pas',
+  CastaliaPasLex in '..\..\castalia\CastaliaPasLex.pas',
+  CastaliaPasLexTypes in '..\..\castalia\CastaliaPasLexTypes.pas',
+  CastaliaSimplePasPar in '..\..\castalia\CastaliaSimplePasPar.pas',
+  CastaliaSimplePasParTypes in '..\..\castalia\CastaliaSimplePasParTypes.pas';
 
 {$R *.RES}
 
 begin
   Application.Initialize;
-
-{$IFDEF LINUX}
-  QGUITestRunner.RunRegisteredTests;
-{$ELSE}
-  if System.IsConsole then
+  if IsConsole then
     TextTestRunner.RunRegisteredTests
   else
     GUITestRunner.RunRegisteredTests;
-{$ENDIF}
-
 end.
 
