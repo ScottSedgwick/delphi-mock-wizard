@@ -31,6 +31,15 @@ resourcestring
   StrMyContextMenu = 'Generate Mock';
   StrSelectedFileIs = 'Generate mocks for interfaces in:'#13#10'%s (%s)';
 
+function ExtractUnitName(const Filename: string): string;
+var
+  sFileExt, sFileName: string;
+begin
+  sFileName := ExtractFileName(FileName);
+  sFileExt := ExtractFileExt(sFileName);
+  Result := Copy(sFileName, 1, Length(sFileName) - Length(sFileExt));
+end;
+
 { TMockGeneratorAddIn }
 
 function TMockGeneratorAddIn.AddMenu(const Ident: string): TMenuItem;
@@ -61,7 +70,7 @@ begin
     try                           
       parser.LoadAndRun(SelectedFilename);
       (BorlandIDEServices as IOTAModuleServices).GetNewModuleAndClassName('', sUnitName, sClassName, sFileName);
-      MockGen := TMockGenerator.Create(sUnitName, parser.AUnit);
+      MockGen := TMockGenerator.Create(sUnitName, ExtractUnitName(SelectedFilename), parser.AUnit);
       try
         MockGen.Output(Lines);
       finally
