@@ -1,0 +1,1 @@
+[PascalMock](http://sourceforge.net/projects/pascalmock/) is a mock object framework for Delphi.  The Delphi Mock Wizard makes generating a mock object from an interface fast and easy.
